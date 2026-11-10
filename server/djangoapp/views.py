@@ -13,6 +13,11 @@ from django.contrib.auth import login, authenticate
 import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
+
+from django.contrib.auth import login, logout, authenticate
+ 
+ 
+ 
 # from .populate import initiate
 
 
@@ -25,18 +30,42 @@ logger = logging.getLogger(__name__)
 # Create a `login_request` view to handle sign in request
 @csrf_exempt
 def login_user(request):
-    # Get username and password from request.POST dictionary
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    # Try to check if provide credential can be authenticated
-    user = authenticate(username=username, password=password)
-    data = {"userName": username}
+    if request.method != "POST":
+        return JsonResponse(
+            {"error": "POST method required"},
+            status=405
+        )
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse(
+            {"error": "Invalid JSON"},
+            status=400
+        )
+
+    username = data.get("userName", "")
+    password = data.get("password", "")
+
+    user = authenticate(
+        request,
+        username=username,
+        password=password
+    )
+
     if user is not None:
-        # If user is valid, call login method to login current user
         login(request, user)
-        data = {"userName": username, "status": "Authenticated"}
-    return JsonResponse(data)
+
+        return JsonResponse({
+            "userName": username,
+            "status": "Authenticated"
+        })
+
+    return JsonResponse({
+        "userName": username,
+        "status": "Failed",
+        "message": "Invalid username or password"
+    }, status=401)
 
 from pathlib import Path
 from django.conf import settings
@@ -67,8 +96,25 @@ def about(request):
 def contact(request):
     return serve_static_page("Contact.html")
 # Create a `logout_request` view to handle sign out request
-# def logout_request(request):
-# ...
+def logout_request(request):
+    if request.method != "GET":
+        return JsonResponse(
+            {"error": "GET method required"},
+            status=405
+        )
+
+    username = (
+        request.user.username
+        if request.user.is_authenticated
+        else ""
+    )
+
+    logout(request)
+
+    return JsonResponse({
+        "userName": username,
+        "status": "Logged out"
+    })
 
 # Create a `registration` view to handle sign up request
 # @csrf_exempt
