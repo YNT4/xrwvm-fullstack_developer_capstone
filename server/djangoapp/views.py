@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User 
- 
+from .restapis import get_request
  
 # from .populate import initiate
 
@@ -178,8 +178,30 @@ def registration(request):
 # ...
 
 # Create a `get_dealer_reviews` view to render the reviews of a dealer
-# def get_dealer_reviews(request,dealer_id):
-# ...
+
+
+
+def get_dealer_reviews(request, dealer_id):
+    if request.method != "GET":
+        return JsonResponse(
+            {"error": "GET method required"},
+            status=405
+        )
+
+    reviews = get_request(
+        f"fetchReviews/dealer/{dealer_id}"
+    )
+
+    if reviews is None:
+        return JsonResponse(
+            {"error": "Unable to retrieve dealer reviews"},
+            status=502
+        )
+
+    return JsonResponse({
+        "reviews": reviews
+    })
+
 
 # Create a `get_dealer_details` view to render the dealer details
 # def get_dealer_details(request, dealer_id):
