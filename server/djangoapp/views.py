@@ -174,8 +174,25 @@ def registration(request):
 
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
-# def get_dealerships(request):
-# ...
+def get_dealerships(request):
+    if request.method != "GET":
+        return JsonResponse(
+            {"error": "GET method required"},
+            status=405
+        )
+
+    dealerships = get_request("fetchDealers")
+
+    if dealerships is None:
+        return JsonResponse(
+            {"error": "Unable to retrieve dealerships"},
+            status=502
+        )
+
+    return JsonResponse(
+        {"dealers": dealerships},
+        status=200
+    )
 
 # Create a `get_dealer_reviews` view to render the reviews of a dealer
 
