@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact Us | Cars Dealership</title>
+  <link rel="stylesheet" href="/static/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body { background: #f5f8fb; color: #243447; }
+    .navbar { background: darkturquoise; min-height: 88px; }
+    .navbar-brand { font-size: 1.6rem; font-weight: 700; }
+    .nav-link { font-size: 1.1rem; }
+    .nav-link.active { font-weight: 700; text-decoration: underline; text-underline-offset: 6px; }
+    .contact-panel { border: 0; border-radius: 18px; overflow: hidden; box-shadow: 0 6px 25px rgba(25,55,80,.09); }
+    .contact-panel img { width: 100%; max-height: 330px; object-fit: contain; background: #eaf3f7; padding: 25px; }
+    .contact-heading { color: #087f8c; }
+    .contact-panel a { overflow-wrap: anywhere; }
+    footer { color: #627286; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+      <a class="navbar-brand" href="/">Dealerships</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <main class="container py-5">
+    <header class="text-center mb-5"><h1 class="display-5 fw-bold">Contact Us</h1><p class="lead text-muted">Have a question about a dealership or your vehicle search? Our team is here to help.</p></header>
+    <section class="card contact-panel" aria-label="Contact information">
+      <div class="row g-0 align-items-center">
+        <div class="col-lg-5"><img src="/static/contactus.png" alt="Contact Cars Dealership customer support"></div>
+        <div class="col-lg-7"><div class="card-body p-4 p-lg-5">
+          <h2 class="h3 contact-heading mb-4">Get in Touch</h2>
+          <dl class="row">
+            <dt class="col-sm-4">Office</dt><dd class="col-sm-8">Cars Dealership — Demo Customer Support</dd>
+            <dt class="col-sm-4">Address</dt><dd class="col-sm-8">100 Example Avenue, Kansas City, MO 64106, USA (sample address)</dd>
+            <dt class="col-sm-4">Phone</dt><dd class="col-sm-8">+1 (202) 555-0147 (sample number)</dd>
+            <dt class="col-sm-4">Email</dt><dd class="col-sm-8"><a href="mailto:support@example.com">support@example.com</a></dd>
+            <dt class="col-sm-4">Business hours</dt><dd class="col-sm-8">Monday–Friday: 9:00 AM–6:00 PM<br>Saturday: 10:00 AM–4:00 PM<br>Sunday: Closed</dd>
+          </dl>
+          <p class="text-muted small mb-0">This is a fictional company profile for an educational capstone project. Contact details are placeholders and are not monitored.</p>
+        </div></div>
+      </div>
+    </section>
+  </main>
+  <footer class="text-center py-4">&copy; 2026 Cars Dealership. Demo project for educational purposes.</footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
