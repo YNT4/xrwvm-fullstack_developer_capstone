@@ -15,7 +15,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth import login, logout, authenticate
- 
+from django.contrib.auth.models import User 
  
  
 # from .populate import initiate
@@ -117,9 +117,60 @@ def logout_request(request):
     })
 
 # Create a `registration` view to handle sign up request
-# @csrf_exempt
-# def registration(request):
-# ...
+
+@csrf_exempt
+def registration(request):
+    if request.method != "POST":
+        return JsonResponse(
+            {"error": "POST method required"},
+            status=405
+        )
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse(
+            {"error": "Invalid JSON"},
+            status=400
+        )
+
+    username = data.get("userName", "").strip()
+    first_name = data.get("firstName", "").strip()
+    last_name = data.get("lastName", "").strip()
+    email = data.get("email", "").strip()
+    password = data.get("password", "")
+
+    if not all([username, first_name, last_name, email, password]):
+        return JsonResponse(
+            {"error": "All fields are required"},
+            status=400
+        )
+
+    if User.objects.filter(username=username).exists():
+        return JsonResponse(
+            {"error": "Username already exists"},
+            status=409
+        )
+
+    if User.objects.filter(email__iexact=email).exists():
+        return JsonResponse(
+            {"error": "Email already exists"},
+            status=409
+        )
+
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name
+    )
+
+    return JsonResponse({
+        "userName": user.username,
+        "status": "Registered"
+    }, status=201)
+
 
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
