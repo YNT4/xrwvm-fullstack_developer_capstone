@@ -38,6 +38,34 @@ def login_user(request):
         data = {"userName": username, "status": "Authenticated"}
     return JsonResponse(data)
 
+from pathlib import Path
+from django.conf import settings
+from django.http import HttpResponse
+
+
+def serve_static_page(filename):
+    file_path = (
+        Path(settings.BASE_DIR)
+        / "frontend"
+        / "static"
+        / filename
+    )
+
+    if not file_path.is_file():
+        return HttpResponse("Page not found", status=404)
+
+    return HttpResponse(
+        file_path.read_text(encoding="utf-8"),
+        content_type="text/html; charset=utf-8"
+    )
+
+
+def about(request):
+    return serve_static_page("About.html")
+
+
+def contact(request):
+    return serve_static_page("Contact.html")
 # Create a `logout_request` view to handle sign out request
 # def logout_request(request):
 # ...
