@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 
 # Create a `login_request` view to handle sign in request
-@csrf_exempt
 def login_user(request):
     if request.method != "POST":
         return JsonResponse(

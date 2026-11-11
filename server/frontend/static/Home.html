@@ -5,24 +5,68 @@
   <link rel="stylesheet" href="static/style.css">
   <link rel="stylesheet" href="static/bootstrap.min.css">
 <script>
+const logout = async (event) => {
+  event.preventDefault();
 
-const logout = async (e) => {
-//Include the code for logout here.
+  try {
+    const response = await fetch("/djangoapp/logout", {
+      method: "GET",
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      throw new Error("Logout failed");
+    }
+
+    window.location.href = "/";
+  } catch (error) {
+    alert("Unable to log out. Please try again.");
+  }
 };
 
-let checkSession = ()=>{
-  let curr_user = sessionStorage.getItem("username");
+const checkSession = async () => {
+  const container = document.getElementById("loginlogout");
 
-  if (curr_user && curr_user !== "") {
-    document.getElementById("loginlogout").innerHTML = 
-    '<span class="homepage_links">' + curr_user +'</span>' +
-    '<a class="homepage_links" onclick="logout()" href="/">Logout</a>'
-  } else {
-    document.getElementById("loginlogout").innerHTML = 
-    '<a class="homepage_links" href="/login">Login</a>'+
-    '<a class="homepage_links"  href="/register">Register</a>'
+  try {
+    const response = await fetch("/djangoapp/session", {
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      throw new Error("Session request failed");
+    }
+
+    const data = await response.json();
+
+    const username = data.username || "";
+
+    if (data.isAuthenticated && username) {
+      container.replaceChildren();
+
+      const userLabel = document.createElement("span");
+      userLabel.className = "homepage_links";
+      userLabel.textContent = username;
+
+      const logoutLink = document.createElement("a");
+      logoutLink.className = "homepage_links";
+      logoutLink.href = "/";
+      logoutLink.textContent = "Logout";
+      logoutLink.addEventListener("click", logout);
+
+      container.append(userLabel, logoutLink);
+    } else {
+      showGuestLinks(container);
+    }
+  } catch (error) {
+    showGuestLinks(container);
   }
- }
+};
+
+function showGuestLinks(container) {
+  container.innerHTML =
+    '<a class="homepage_links" href="/login">Login</a>' +
+    '<a class="homepage_links" href="/register">Register</a>';
+}
 </script>
 </head>
 <body onload="checkSession()">

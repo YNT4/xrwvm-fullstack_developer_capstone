@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from django.conf.urls.static import static
 from django.conf import settings
 from djangoapp import views
-
+from django.views.decorators.csrf import ensure_csrf_cookie
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('djangoapp/', include('djangoapp.urls')),
@@ -15,6 +15,12 @@ urlpatterns = [
 
     path('about', views.about, name='about'),
     path('contact', views.contact, name='contact'),
+    path(
+    'login',
+    ensure_csrf_cookie(
+        TemplateView.as_view(template_name="Login.html")
+    ),
+    name='login_page'),
     path(
         'dealers',
         TemplateView.as_view(template_name="Dealers.html"),

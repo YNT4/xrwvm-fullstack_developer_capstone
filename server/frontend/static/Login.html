@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Dealerships</title>
+  <link rel="stylesheet" href="/static/bootstrap.min.css">
+</head>
+<body>
+  <nav class="navbar navbar-light bg-info px-4">
+    <a class="navbar-brand" href="/">Dealerships</a>
+  </nav>
+
+  <main class="container mt-5" style="max-width: 460px;">
+    <h2 class="mb-4">Login</h2>
+
+    <form id="loginForm">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" id="username"
+               class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password"
+               class="form-control" required>
+      </div>
+
+      <div id="message" class="text-danger mb-3"
+           role="alert"></div>
+
+      <button type="submit" class="btn btn-primary">
+        Login
+      </button>
+    </form>
+  </main>
+
+  <script>
+    document.getElementById("loginForm")
+      .addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const message = document.getElementById("message");
+        message.textContent = "";
+
+        const userName =
+          document.getElementById("username").value;
+        const password =
+          document.getElementById("password").value;
+
+        try {
+          const response = await fetch("/djangoapp/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken")
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ userName, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.status === "Authenticated") {
+            window.location.href = "/";
+          } else {
+            message.textContent =
+              data.message || "Login failed.";
+          }
+        } catch (error) {
+          message.textContent =
+            "Unable to connect to the server.";
+        }
+      });
+
+    function getCookie(name) {
+      const cookies = document.cookie.split(";");
+      for (const cookie of cookies) {
+        const item = cookie.trim();
+        if (item.startsWith(name + "=")) {
+          return decodeURIComponent(
+            item.substring(name.length + 1)
+          );
+        }
+      }
+      return "";
+    }
+  </script>
+</body>
+</html>
