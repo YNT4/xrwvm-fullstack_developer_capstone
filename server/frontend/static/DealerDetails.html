@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dealer Details and Reviews</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-light px-4" style="background-color: darkturquoise;">
+    <a class="navbar-brand" href="/">Dealerships</a>
+    <a href="/dealers">All Dealerships</a>
+  </nav>
+
+  <div class="container mt-4">
+    <h2>Dealer Details</h2>
+
+    <div class="card mb-4">
+      <div class="card-body" id="dealerDetails">
+        Loading dealer information...
+      </div>
+    </div>
+
+    <h3>Customer Reviews</h3>
+    <div id="reviewsList">Loading reviews...</div>
+  </div>
+
+  <script>
+    const dealerId = window.location.pathname.split("/").filter(Boolean).pop();
+
+    function addField(container, label, value) {
+      const p = document.createElement("p");
+      const strong = document.createElement("strong");
+      strong.textContent = label + ": ";
+      p.appendChild(strong);
+      p.appendChild(document.createTextNode(value ?? "N/A"));
+      container.appendChild(p);
+    }
+
+    async function loadDealerDetails() {
+      const container = document.getElementById("dealerDetails");
+
+      try {
+        const response = await fetch(`/djangoapp/dealer/${dealerId}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const dealer = data.dealer;
+
+        if (!dealer) throw new Error("Dealer not found");
+
+        container.replaceChildren();
+
+        const title = document.createElement("h4");
+        title.textContent = dealer.full_name;
+        container.appendChild(title);
+
+        addField(container, "Dealer ID", dealer.id);
+        addField(container, "City", dealer.city);
+        addField(container, "State", dealer.state);
+        addField(container, "Address", dealer.address);
+        addField(container, "ZIP", dealer.zip);
+
+      } catch (error) {
+        container.textContent = "Unable to load dealer: " + error.message;
+      }
+    }
+
+    async function loadReviews() {
+      const container = document.getElementById("reviewsList");
+
+      try {
+        const response = await fetch(
+          `/djangoapp/dealer/${dealerId}/reviews`
+        );
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const reviews = data.reviews || [];
+
+        container.replaceChildren();
+
+        if (reviews.length === 0) {
+          container.textContent = "No reviews available for this dealer.";
+          return;
+        }
+
+        reviews.forEach(review => {
+          const card = document.createElement("div");
+          card.className = "card mb-3";
+
+          const body = document.createElement("div");
+          body.className = "card-body";
+
+          const heading = document.createElement("h5");
+          heading.textContent = review.name || "Customer";
+
+          const text = document.createElement("p");
+          text.textContent = review.review || "";
+
+          body.appendChild(heading);
+          body.appendChild(text);
+
+          if (review.purchase) {
+            addField(body, "Purchase", review.purchase);
+          }
+
+          card.appendChild(body);
+          container.appendChild(card);
+        });
+
+      } catch (error) {
+        container.textContent = "Unable to load reviews: " + error.message;
+      }
+    }
+
+    loadDealerDetails();
+    loadReviews();
+  </script>
+</body>
+</html>

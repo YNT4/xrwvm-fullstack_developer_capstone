@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Deployment and local development
+secretkey.txt
+**/venv/
+**/__pycache__/
+**/staticfiles/
+**/db.sqlite3
+**/cookies.txt
+.env
+.env.*

@@ -9,15 +9,27 @@ urlpatterns = [
     path('login', views.login_user, name='login'),
     path('logout', views.logout_request, name='logout'),
     path('register', views.registration, name='register'),
+    path('session', views.get_session, name='session'),
     path(
     "dealers",
     views.get_dealerships,
     name="dealerships"),
     path(
+    "dealer/<int:dealer_id>",
+    views.get_dealer_by_id,
+    name="dealer_by_id"),
+    path(
+    "get_cars",
+    views.get_cars,
+    name="get_cars"),
+    path(
     'dealer/<int:dealer_id>/reviews',
     views.get_dealer_reviews,
-    name='dealer_reviews'
-),
+    name='dealer_reviews'),
+    path(
+    "add_review",
+    views.add_review,
+    name="add_review"),
 ] + static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT

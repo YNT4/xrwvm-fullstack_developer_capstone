@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Review - Car Dealerships</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-light px-4" style="background-color: darkturquoise;">
+    <a class="navbar-brand" href="/">Dealerships</a>
+    <a href="/dealers">All Dealerships</a>
+  </nav>
+
+  <div class="container mt-4">
+    <h2>Post Review</h2>
+
+    <h4 id="dealerName">Loading dealer information...</h4>
+    <p id="username" class="text-muted"></p>
+
+    <form id="reviewForm" hidden>
+      <div class="mb-3">
+        <label for="review" class="form-label">Your Review</label>
+        <textarea id="review" class="form-control" rows="4"
+                  placeholder="Write your experience with this dealership..."
+                  required></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="purchaseDate" class="form-label">Purchase Date</label>
+        <input type="date" id="purchaseDate" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="carMake" class="form-label">Car Make</label>
+        <select id="carMake" class="form-select" required>
+          <option value="">Select Car Make</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="carModel" class="form-label">Car Model</label>
+        <select id="carModel" class="form-select" required>
+          <option value="">Select Car Model</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="carYear" class="form-label">Car Year</label>
+        <input type="number" id="carYear" class="form-control"
+               min="2015" max="2023" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Post Review
+      </button>
+    </form>
+
+    <p id="message" class="text-danger"></p>
+  </div>
+
+  <script>
+    const dealerId = window.location.pathname.split("/").pop();
+    let carMakes = [];
+
+    const makeSelect = document.getElementById("carMake");
+    const modelSelect = document.getElementById("carModel");
+    const yearInput = document.getElementById("carYear");
+
+    async function initializePage() {
+      try {
+        // 1. Check Django login session
+        const sessionResponse = await fetch("/djangoapp/session");
+        if (!sessionResponse.ok) throw new Error("Session API unavailable");
+
+        const session = await sessionResponse.json();
+
+        if (!session.isAuthenticated) {
+          document.getElementById("message").textContent =
+            "Please log in before posting a review.";
+          return;
+        }
+
+        document.getElementById("username").textContent =
+          "Logged in as: " + session.username;
+
+        // 2. Load selected dealership
+        const dealerResponse = await fetch(`/djangoapp/dealer/${dealerId}`);
+        if (!dealerResponse.ok) throw new Error("Unable to load dealer");
+
+        const dealerData = await dealerResponse.json();
+
+        document.getElementById("dealerName").textContent =
+          "Dealer: " + dealerData.dealer.full_name;
+
+        // 3. Load car makes and models
+        const carsResponse = await fetch("/djangoapp/get_cars");
+        if (!carsResponse.ok) throw new Error("Unable to load cars");
+
+        const carsData = await carsResponse.json();
+        carMakes = carsData.car_makes || [];
+
+        carMakes.forEach(make => {
+          const option = document.createElement("option");
+          option.value = make.id;
+          option.textContent = make.name;
+          makeSelect.appendChild(option);
+        });
+
+        document.getElementById("reviewForm").hidden = false;
+
+      } catch (error) {
+        document.getElementById("message").textContent = error.message;
+        console.error(error);
+      }
+    }
+
+    makeSelect.addEventListener("change", function () {
+      modelSelect.innerHTML = '<option value="">Select Car Model</option>';
+      yearInput.value = "";
+
+      const selectedMake = carMakes.find(
+        make => String(make.id) === this.value
+      );
+
+      if (!selectedMake) return;
+
+      selectedMake.models.forEach(model => {
+        const option = document.createElement("option");
+        option.value = model.id;
+        option.textContent = model.name;
+        modelSelect.appendChild(option);
+      });
+    });
+
+    modelSelect.addEventListener("change", function () {
+      const selectedMake = carMakes.find(
+        make => String(make.id) === makeSelect.value
+      );
+
+      if (!selectedMake) return;
+
+      const selectedModel = selectedMake.models.find(
+        model => String(model.id) === this.value
+      );
+
+      yearInput.value = selectedModel ? selectedModel.year : "";
+    });
+
+
+  document.getElementById("reviewForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const selectedMake = carMakes.find(
+        make => String(make.id) === makeSelect.value
+      );
+
+      const selectedModel = selectedMake?.models.find(
+        model => String(model.id) === modelSelect.value
+      );
+
+      if (!selectedMake || !selectedModel) {
+        alert("Please select a car make and model.");
+        return;
+      }
+
+      const reviewData = {
+        dealership: Number(dealerId),
+        review: document.getElementById("review").value.trim(),
+        purchase: true,
+        purchase_date: document.getElementById("purchaseDate").value,
+        car_make: selectedMake.name,
+        car_model: selectedModel.name,
+        car_year: Number(yearInput.value)
+      };
+
+      try {
+        const response = await fetch("/djangoapp/add_review", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(reviewData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Unable to submit review");
+        }
+
+        alert("Review submitted successfully!");
+        window.location.href = `/dealer/${dealerId}`;
+
+      } catch (error) {
+        alert("Error: " + error.message);
+        console.error(error);
+      }
+    });
+
+
+    initializePage();
+  </script>
+</body>
+</html>

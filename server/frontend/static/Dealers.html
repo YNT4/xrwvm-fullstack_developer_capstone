@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dealerships - All Dealers</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-light px-4" style="background-color: darkturquoise;">
+    <a class="navbar-brand" href="/">Dealerships</a>
+    <div id="loginlogout">
+      <a href="/login" class="me-3">Login</a>
+      <a href="/register">Register</a>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-4">
+    <h2>All Car Dealerships</h2>
+    <div class="mb-3">
+      <label for="stateFilter" class="form-label">
+        <strong>Filter Dealers by State:</strong>
+      </label>
+
+      <select id="stateFilter" class="form-select" style="max-width:300px;">
+        <option value="">All States</option>
+      </select>
+    </div>
+
+    <p id="filterResult" class="text-muted"></p>
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Dealer Name</th>
+            <th>City</th>
+            <th>Address</th>
+            <th>Zip</th>
+            <th>State</th>
+            <th id="reviewHeader" style="display:none;">
+              Review Dealer
+            </th>
+          </tr>
+        </thead>
+        <tbody id="dealersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+
+<script>
+  let isLoggedIn = false;
+
+  async function checkLoginStatus() {
+    const response = await fetch("/djangoapp/session", {
+      credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+      throw new Error("Unable to check login session");
+    }
+
+    const data = await response.json();
+    isLoggedIn = data.isAuthenticated === true;
+
+    const loginArea = document.getElementById("loginlogout");
+
+    if (isLoggedIn) {
+      loginArea.textContent = data.username;
+      document.getElementById("reviewHeader").style.display = "";
+    } else {
+      loginArea.innerHTML =
+        '<a href="/login" class="me-3">Login</a>' +
+        '<a href="/register">Register</a>';
+    }
+  }
+
+
+async function loadDealers() {
+  const tbody = document.getElementById("dealersTable");
+  const stateFilter = document.getElementById("stateFilter");
+  const filterResult = document.getElementById("filterResult");
+
+  tbody.innerHTML = "";
+
+  try {
+    const response = await fetch("/djangoapp/dealers");
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const data = await response.json();
+    const allDealers = data.dealers || [];
+
+    // Lấy danh sách State duy nhất
+    const states = [...new Set(
+      allDealers.map(dealer => dealer.state).filter(Boolean)
+    )].sort();
+
+    // Tạo các lựa chọn State
+    stateFilter.innerHTML = '<option value="">All States</option>';
+
+    states.forEach(state => {
+      const option = document.createElement("option");
+      option.value = state;
+      option.textContent = state;
+      stateFilter.appendChild(option);
+    });
+
+    function renderDealers(selectedState) {
+      tbody.innerHTML = "";
+
+      const filteredDealers = selectedState
+        ? allDealers.filter(dealer => dealer.state === selectedState)
+        : allDealers;
+
+      filteredDealers.forEach(dealer => {
+        const row = document.createElement("tr");
+
+        [
+          dealer.id,
+          dealer.full_name,
+          dealer.city,
+          dealer.address,
+          dealer.zip,
+          dealer.state
+        ].forEach(value => {
+          const cell = document.createElement("td");
+          cell.textContent = value ?? "";
+          row.appendChild(cell);
+        });
+
+        if (isLoggedIn) {
+          const reviewCell = document.createElement("td");
+          const reviewLink = document.createElement("a");
+
+          reviewLink.href = `/postreview/${dealer.id}`;
+          reviewLink.textContent = "Review Dealer";
+          reviewLink.className = "btn btn-primary btn-sm";
+
+          reviewCell.appendChild(reviewLink);
+          row.appendChild(reviewCell);
+        }
+
+        const dealerNameCell = row.children[1];
+        const dealerLink = document.createElement("a");
+
+        dealerLink.href = `/dealer/${dealer.id}`;
+        dealerLink.textContent = dealer.full_name;
+
+        dealerNameCell.replaceChildren(dealerLink);
+
+        tbody.appendChild(row);
+      });
+
+      filterResult.textContent =
+        `Showing ${filteredDealers.length} dealership(s)` +
+        (selectedState ? ` in ${selectedState}` : " in all states");
+    }
+
+    // Đọc State từ URL khi tải trang
+    const params = new URLSearchParams(window.location.search);
+    const initialState = params.get("state") || "";
+
+    if (states.includes(initialState)) {
+      stateFilter.value = initialState;
+      renderDealers(initialState);
+    } else {
+      renderDealers("");
+    }
+
+    // Xử lý khi người dùng thay đổi State
+    stateFilter.addEventListener("change", function () {
+      const selectedState = this.value;
+
+      const url = new URL(window.location.href);
+
+      if (selectedState) {
+        url.searchParams.set("state", selectedState);
+      } else {
+        url.searchParams.delete("state");
+      }
+
+      window.history.replaceState({}, "", url);
+      renderDealers(selectedState);
+    });
+
+  } catch (error) {
+    console.error("Error loading dealerships:", error);
+    filterResult.textContent =
+      "Unable to load dealerships: " + error.message;
+  }
+}
+
+
+  async function initializePage() {
+    try {
+      await checkLoginStatus();
+      await loadDealers();
+    } catch (error) {
+      console.error("Page initialization failed:", error);
+    }
+  }
+
+  initializePage();
+</script>
+
+</body>
+</html>

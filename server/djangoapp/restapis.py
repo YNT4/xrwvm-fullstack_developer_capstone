@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-backend_url = os.getenv("backend_url", "http://localhost:3030")
+backend_url = os.getenv("BACKEND_URL", "http://localhost:3030")
 
 sentiment_analyzer_url = os.getenv(
     "sentiment_analyzer_url",

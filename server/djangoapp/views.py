@@ -12,12 +12,16 @@ from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 import logging
 import json
+import requests
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 from .restapis import get_request
- 
+from .models import CarMake, CarModel
+from .restapis import get_request, backend_url
+
 # from .populate import initiate
 
 
@@ -219,11 +223,140 @@ def get_dealer_reviews(request, dealer_id):
         "reviews": reviews
     })
 
+def get_dealer_by_id(request, dealer_id):
+    if request.method != "GET":
+        return JsonResponse(
+            {"error": "GET method required"},
+            status=405
+        )
 
+    dealer = get_request(f"fetchDealer/{dealer_id}")
+
+    if dealer is None:
+        return JsonResponse(
+            {"error": "Unable to retrieve dealer"},
+            status=502
+        )
+
+    return JsonResponse(
+        {"dealer": dealer},
+        status=200
+    )
+def get_cars(request):
+    if request.method != "GET":
+        return JsonResponse(
+            {"error": "GET method required"},
+            status=405
+        )
+
+    car_makes = CarMake.objects.prefetch_related(
+        "car_models"
+    ).all().order_by("id")
+
+    result = []
+
+    for make in car_makes:
+        models = []
+
+        for car in make.car_models.all():
+            models.append({
+                "id": car.id,
+                "name": car.name,
+                "type": car.type,
+                "year": car.year
+            })
+
+        result.append({
+            "id": make.id,
+            "name": make.name,
+            "description": make.description,
+            "models": models
+        })
+
+    return JsonResponse(
+        {"car_makes": result},
+        status=200
+    )
+def get_session(request):
+    if request.user.is_authenticated:
+        return JsonResponse({
+            "isAuthenticated": True,
+            "username": request.user.username
+        })
+
+    return JsonResponse({
+        "isAuthenticated": False,
+        "username": None
+    })
 # Create a `get_dealer_details` view to render the dealer details
 # def get_dealer_details(request, dealer_id):
 # ...
 
 # Create a `add_review` view to submit a review
 # def add_review(request):
-# ...
+
+@login_required
+@csrf_exempt
+def add_review(request):
+    if request.method != "POST":
+        return JsonResponse(
+            {"error": "POST method required"},
+            status=405
+        )
+
+    try:
+        data = json.loads(request.body)
+
+        required_fields = [
+            "dealership",
+            "review",
+            "purchase_date",
+            "car_make",
+            "car_model",
+            "car_year"
+        ]
+
+        for field in required_fields:
+            if not data.get(field):
+                return JsonResponse(
+                    {"error": f"Missing field: {field}"},
+                    status=400
+                )
+
+        review_data = {
+            "name": request.user.get_full_name()
+                    or request.user.username,
+            "dealership": int(data["dealership"]),
+            "review": data["review"],
+            "purchase": True,
+            "purchase_date": data["purchase_date"],
+            "car_make": data["car_make"],
+            "car_model": data["car_model"],
+            "car_year": int(data["car_year"])
+        }
+
+        response = requests.post(
+            f"{backend_url.rstrip('/')}/insert_review",
+            json=review_data,
+            timeout=10
+        )
+
+        response.raise_for_status()
+
+        return JsonResponse({
+            "status": 200,
+            "message": "Review added successfully",
+            "review": response.json()
+        })
+
+    except (ValueError, TypeError, KeyError, json.JSONDecodeError) as error:
+        return JsonResponse(
+            {"error": str(error)},
+            status=400
+        )
+
+    except requests.RequestException as error:
+        return JsonResponse(
+            {"error": str(error)},
+            status=502
+        )
