@@ -22,6 +22,12 @@ urlpatterns = [
     ),
     name='login_page'),
     path(
+    'register',
+    ensure_csrf_cookie(
+        TemplateView.as_view(template_name="Register.html")
+    ),
+    name='register_page'),
+    path(
         'dealers',
         TemplateView.as_view(template_name="Dealers.html"),
         name='dealers_page'),
