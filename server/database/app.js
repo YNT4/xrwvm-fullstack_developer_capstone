@@ -15,7 +15,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const reviews_data = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "reviews.json"), "utf8")
+  fs.readFileSync(
+    path.join(__dirname, "data", "reviews.json"),
+    "utf8"
+  )
+);
+
+const dealerships_data = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "data", "dealerships.json"),
+    "utf8"
+  )
 );
 
 const dealerships_data = JSON.parse(
