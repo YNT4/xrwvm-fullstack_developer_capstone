@@ -94,8 +94,30 @@ app.get('/fetchDealers', async (req, res) => {
 });
 
 // Express route to fetch Dealers by a particular state
+// Express route to fetch Dealers by a particular state
 app.get('/fetchDealers/:state', async (req, res) => {
-//Write your code here
+    try {
+        const state = req.params.state.trim();
+
+        if (!state) {
+            return res.status(400).json({
+                error: 'State is required'
+            });
+        }
+
+        const dealerships = await Dealerships.find({
+            state: { $regex: `^${state.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+        });
+
+        return res.status(200).json(dealerships);
+
+    } catch (error) {
+        console.error('Error fetching dealerships by state:', error);
+
+        return res.status(500).json({
+            error: 'Error fetching dealerships by state'
+        });
+    }
 });
 
 // Express route to fetch dealer by a particular id
