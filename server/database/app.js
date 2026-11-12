@@ -27,11 +27,7 @@ const dealerships_data = JSON.parse(
     "utf8"
   )
 );
-
-const dealerships_data = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "dealerships.json"), "utf8")
-);
-
+ 
 const Reviews = require('./review');
 const Dealerships = require('./dealership');
 
