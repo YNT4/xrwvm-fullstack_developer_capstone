@@ -99,6 +99,7 @@ def about(request):
 def contact(request):
     return serve_static_page("Contact.html")
 # Create a `logout_request` view to handle sign out request
+# Handle user logout
 def logout_request(request):
     if request.method != "GET":
         return JsonResponse(
@@ -106,16 +107,10 @@ def logout_request(request):
             status=405
         )
 
-    username = (
-        request.user.username
-        if request.user.is_authenticated
-        else ""
-    )
-
     logout(request)
 
     return JsonResponse({
-        "userName": username,
+        "userName": "",
         "status": "Logged out"
     })
 
