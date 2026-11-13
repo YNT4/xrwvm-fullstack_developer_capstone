@@ -1,0 +1,23 @@
+Task 11 - Get Dealers by State: Kansas
+
+cURL command:
+curl -i https://ynt4-dealership-api.onrender.com/fetchDealers/Kansas
+
+Output:
+HTTP/1.1 200 OK
+Date: Thu, 12 Nov 2026 16:03:19 GMT
+Content-Type: application/json; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+access-control-allow-origin: *
+cf-cache-status: DYNAMIC
+etag: W/"de-QiJ+Y3V1FyRwthFo/XKlR6lC+Bs"
+rndr-id: 09a7d3a9-8018-4da4
+Server: cloudflare
+vary: Accept-Encoding
+x-powered-by: Express
+x-render-origin-server: Render
+CF-RAY: a596c41e3afa0974-HKG
+alt-svc: h3=":443"; ma=86400
+
+[{"_id":"6af57db9d121ca930ec28a9d","id":8,"city":"Topeka","state":"Kansas","address":"288 Larry Place","zip":"66642","lat":"39.0429","long":"-95.7697","short_name":"Bytecard","full_name":"Bytecard Car Dealership","__v":0}]
