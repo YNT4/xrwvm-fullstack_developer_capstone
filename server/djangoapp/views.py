@@ -246,6 +246,7 @@ def get_cars(request):
     ).all().order_by("id")
 
     result = []
+    car_models = []
 
     for make in car_makes:
         models = []
@@ -258,6 +259,11 @@ def get_cars(request):
                 "year": car.year
             })
 
+            car_models.append({
+                "CarMake": make.name,
+                "CarModel": car.name
+            })
+
         result.append({
             "id": make.id,
             "name": make.name,
@@ -266,7 +272,10 @@ def get_cars(request):
         })
 
     return JsonResponse(
-        {"car_makes": result},
+        {
+            "CarModels": car_models,
+            "car_makes": result
+        },
         status=200
     )
 def get_session(request):
