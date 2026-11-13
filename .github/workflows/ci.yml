@@ -9,7 +9,59 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint-python:
+    name: Lint Python Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python Linter
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+
+      - name: Run Linter
+        run: |
+          flake8 server/djangoapp server/server \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics
+
+  lint-javascript:
+    name: Lint JavaScript Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install JavaScript Linter
+        run: npm install --no-save --no-package-lock eslint@8
+
+      - name: Run Linter
+        run: |
+          npx eslint server/database/app.js \
+            --no-eslintrc \
+            --env node,es2021 \
+            --parser-options '{"ecmaVersion":2021}' \
+            --rule 'no-undef:error' \
+            --rule 'no-unexpected-multiline:error'
+
   build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
