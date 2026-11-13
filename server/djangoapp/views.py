@@ -366,3 +366,22 @@ def get_csrf_token(request):
     return JsonResponse({
         "message": "CSRF cookie set"
     })
+def get_dealers_by_state(request, state):
+    if request.method != "GET":
+        return JsonResponse(
+            {"error": "GET method required"},
+            status=405
+        )
+
+    dealers = get_request(f"fetchDealers/{state}")
+
+    if dealers is None:
+        return JsonResponse(
+            {"error": "Unable to retrieve dealers by state"},
+            status=502
+        )
+
+    return JsonResponse(
+        {"dealers": dealers},
+        status=200
+    )

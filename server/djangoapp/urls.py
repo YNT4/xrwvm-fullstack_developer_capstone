@@ -31,6 +31,10 @@ urlpatterns = [
     views.add_review,
     name="add_review"),
     path('csrf/', views.get_csrf_token, name='csrf'),
+    path(
+    "dealers/<str:state>",
+    views.get_dealers_by_state,
+    name="dealers_by_state"),
 ] + static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT
