@@ -21,7 +21,7 @@ from django.contrib.auth.models import User
 from .restapis import get_request
 from .models import CarMake, CarModel
 from .restapis import get_request, backend_url
-
+from django.views.decorators.csrf import ensure_csrf_cookie
 # from .populate import initiate
 
 
@@ -352,3 +352,8 @@ def add_review(request):
             {"error": str(error)},
             status=502
         )
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return JsonResponse({
+        "message": "CSRF cookie set"
+    })
