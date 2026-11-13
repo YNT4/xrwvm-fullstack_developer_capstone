@@ -1,0 +1,40 @@
+Question 6 - Logout User
+========================
+
+API Endpoint:
+GET https://ynt4-cars-dealership.onrender.com/djangoapp/logout
+
+Prerequisite:
+The user must already be logged in, with the authenticated
+session stored in cookies.txt.
+
+cURL Command:
+
+curl -sS \
+  -b cookies.txt -c cookies.txt \
+  -w '\nHTTP Status: %{http_code}\n' \
+  https://ynt4-cars-dealership.onrender.com/djangoapp/logout
+
+Actual Test Result:
+
+HTTP Status: 200
+
+{
+  "userName": "",
+  "status": "Logged out"
+}
+
+Session Verification After Logout:
+
+curl -sS \
+  -b cookies.txt \
+  https://ynt4-cars-dealership.onrender.com/djangoapp/session
+
+HTTP Status: 200
+
+{
+  "isAuthenticated": false,
+  "username": null
+}
+
+Result: PASS

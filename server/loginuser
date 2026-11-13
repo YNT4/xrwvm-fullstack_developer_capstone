@@ -1,0 +1,42 @@
+Question 5 - Login User
+=======================
+
+API Endpoint:
+POST https://ynt4-cars-dealership.onrender.com/djangoapp/login
+
+Prerequisites:
+- A registered Django user account
+- A valid CSRF cookie and token obtained from /djangoapp/csrf/
+- The same cookie jar must be used for CSRF and login
+
+cURL Command:
+
+curl -sS \
+  -b cookies.txt -c cookies.txt \
+  -H "Content-Type: application/json" \
+  -H "Referer: https://ynt4-cars-dealership.onrender.com/" \
+  -H "X-CSRFToken: ${CSRF_TOKEN}" \
+  --data '{"userName":"capstone_test_1794539573","password":"REPLACE_WITH_PASSWORD"}' \
+  https://ynt4-cars-dealership.onrender.com/djangoapp/login
+
+Actual Test Result:
+
+HTTP Status: 200
+
+{
+  "userName": "capstone_test_1794539573",
+  "status": "Authenticated"
+}
+
+Session Verification:
+
+GET /djangoapp/session
+
+HTTP Status: 200
+
+{
+  "isAuthenticated": true,
+  "username": "capstone_test_1794539573"
+}
+
+Result: PASS
