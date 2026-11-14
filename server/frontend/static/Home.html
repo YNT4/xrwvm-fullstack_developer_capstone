@@ -5,8 +5,12 @@
   <link rel="stylesheet" href="static/style.css">
   <link rel="stylesheet" href="static/bootstrap.min.css">
 <script>
+
 const logout = async (event) => {
   event.preventDefault();
+
+  const username =
+    document.querySelector("#loginlogout .homepage_links")?.textContent || "user";
 
   try {
     const response = await fetch("/djangoapp/logout", {
@@ -18,11 +22,23 @@ const logout = async (event) => {
       throw new Error("Logout failed");
     }
 
-    window.location.href = "/";
+    const data = await response.json();
+
+    if (data.status === "Logged out") {
+      // Display the logout alert before redirecting.
+      window.alert("Logging out " + username + "...");
+
+      // Redirect after the user closes the alert.
+      window.location.href = "/";
+    } else {
+      window.alert("Unable to log out. Please try again.");
+    }
   } catch (error) {
-    alert("Unable to log out. Please try again.");
+    console.error("Logout error:", error);
+    window.alert("Unable to log out. Please try again.");
   }
 };
+
 
 const checkSession = async () => {
   const container = document.getElementById("loginlogout");
