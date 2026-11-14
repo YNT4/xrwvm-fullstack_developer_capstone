@@ -1,10 +1,20 @@
-FROM python:3.9.18-slim-bookworm
 
+FROM python:3.9-slim-bookworm
 
-WORKDIR /python-docker
+WORKDIR /app
 
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-RUN ls
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+
+# Make the bundled VADER lexicon available to NLTK
+RUN mkdir -p /usr/local/nltk_data/sentiment && \
+    cp sentiment/vader_lexicon.zip /usr/local/nltk_data/sentiment/
+
+ENV NLTK_DATA=/usr/local/nltk_data
+ENV FLASK_APP=app.py
+
+EXPOSE 10000
+
+CMD ["sh", "-c", "flask run --host=0.0.0.0 --port=${PORT:-10000}"]
