@@ -40,7 +40,7 @@
             <th>Zip</th>
             <th>State</th>
             <th id="reviewHeader" style="display:none;">
-              Review Dealer
+              Post Review
             </th>
           </tr>
         </thead>
@@ -138,7 +138,7 @@ async function loadDealers() {
           const reviewLink = document.createElement("a");
 
           reviewLink.href = `/postreview/${dealer.id}`;
-          reviewLink.textContent = "Review Dealer";
+          reviewLink.textContent = "Post Review";
           reviewLink.className = "btn btn-primary btn-sm";
 
           reviewCell.appendChild(reviewLink);
